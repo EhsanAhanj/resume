@@ -5,7 +5,7 @@ import * as THREE from "three";
 import * as dat from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
-import CANNON from 'cannon' 
+import CANNON from "cannon";
 // Debug
 const gui = new dat.GUI();
 
@@ -16,7 +16,12 @@ const scene = new THREE.Scene();
 const canvas = document.querySelector("canvas.webgl");
 
 // CAMERA
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(
+  45,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
 camera.position.y = 6;
 camera.position.z = 12;
 camera.position.x = 0;
@@ -24,7 +29,7 @@ const textureLoader = new THREE.TextureLoader();
 
 // RENDERER
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas,
+  canvas: canvas,
 });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor("#262837");
@@ -43,53 +48,63 @@ orbitControls.update();
 
 // MODEL WITH ANIMATIONS
 var characterControls;
-new FBXLoader().load("objects/characters/Boss/theboss.fbx", async function (fbx) {
+new FBXLoader().load(
+  "objects/characters/Boss/theboss.fbx",
+  async function (fbx) {
     fbx.traverse(function (object) {
-        if (object.isMesh) object.castShadow = true;
+      if (object.isMesh) object.castShadow = true;
     });
     if (window.innerWidth < 600) {
-        fbx.scale.setScalar(0.0086);
+      fbx.scale.setScalar(0.0086);
     } else {
-        fbx.scale.setScalar(0.016);
+      fbx.scale.setScalar(0.016);
     }
-    fbx.position.set(0,0,5)
+    fbx.position.set(0, 0, 5);
     const mixer = new THREE.AnimationMixer(fbx);
     const animationsMap = new Map();
     const anim = new FBXLoader();
     anim.setPath("objects/characters/Boss/animations/");
     await new Promise((resolve) => {
-        anim.load("Running.fbx", (anim1) => {
-            mixer.clipAction(anim1.animations[0]).clampWhenFinished = true;
-            mixer.clipAction(anim1.animations[0]).loop = THREE.LoopRepeat;
-            mixer.clipAction(anim1.animations[0]).setEffectiveTimeScale(1.0);
-            mixer.clipAction(anim1.animations[0]).setEffectiveWeight(1.0);
-            mixer.clipAction(anim1.animations[0]).zeroSlopeAtEnd = true;
-            mixer.clipAction(anim1.animations[0]).zeroSlopeAtStart = true;
-            resolve(mixer.clipAction(anim1.animations[0]));
-        });
+      anim.load("Running.fbx", (anim1) => {
+        mixer.clipAction(anim1.animations[0]).clampWhenFinished = true;
+        mixer.clipAction(anim1.animations[0]).loop = THREE.LoopRepeat;
+        mixer.clipAction(anim1.animations[0]).setEffectiveTimeScale(1.0);
+        mixer.clipAction(anim1.animations[0]).setEffectiveWeight(1.0);
+        mixer.clipAction(anim1.animations[0]).zeroSlopeAtEnd = true;
+        mixer.clipAction(anim1.animations[0]).zeroSlopeAtStart = true;
+        resolve(mixer.clipAction(anim1.animations[0]));
+      });
     }).then((res) => animationsMap.set("Run", res)); // 3 sec
 
     await new Promise((resolve) => {
-        anim.load("Idle.fbx", (anim1) => {
-            resolve(anim1.animations[0]);
-        });
+      anim.load("Idle.fbx", (anim1) => {
+        resolve(anim1.animations[0]);
+      });
     }).then((res) => animationsMap.set("Idle", mixer.clipAction(res))); // 3 sec
 
     await new Promise((resolve) => {
-        anim.load("Samba Dancing.fbx", (anim1) => {
-            resolve(anim1.animations[0]);
-        });
+      anim.load("Samba Dancing.fbx", (anim1) => {
+        resolve(anim1.animations[0]);
+      });
     }).then((res) => animationsMap.set("Dance", mixer.clipAction(res))); // 3 sec
 
     await new Promise((resolve) => {
-        anim.load("Walking.fbx", (anim1) => {
-            resolve(anim1.animations[0]);
-        });
+      anim.load("Walking.fbx", (anim1) => {
+        resolve(anim1.animations[0]);
+      });
     }).then((res) => animationsMap.set("Walk", mixer.clipAction(res))); // 3 sec
 
     scene.add(fbx);
-    characterControls = new CharacterControls(fbx, mixer, animationsMap, orbitControls, camera, "Idle");
-});
+    characterControls = new CharacterControls(
+      fbx,
+      mixer,
+      animationsMap,
+      orbitControls,
+      camera,
+      "Idle"
+    );
+  }
+);
 
 /**
  * House
@@ -97,57 +112,72 @@ new FBXLoader().load("objects/characters/Boss/theboss.fbx", async function (fbx)
 // House container
 const doorColorTexture = textureLoader.load("/textures/door/color.jpg");
 const doorAlphaTexture = textureLoader.load("/textures/door/alpha.jpg");
-const doorAmbientOcclusionTexture = textureLoader.load("/textures/door/ambientOcclusion.jpg");
+const doorAmbientOcclusionTexture = textureLoader.load(
+  "/textures/door/ambientOcclusion.jpg"
+);
 const doorHeightTexture = textureLoader.load("/textures/door/height.jpg");
 const doorNormalTexture = textureLoader.load("/textures/door/normal.jpg");
 const doorMetalnessTexture = textureLoader.load("/textures/door/metalness.jpg");
 const doorRoughnessTexture = textureLoader.load("/textures/door/roughness.jpg");
 
 const bricksColorTexture = textureLoader.load("/textures/bricks/color.jpg");
-const bricksAmbientOcclusionTexture = textureLoader.load("/textures/bricks/ambientOcclusion.jpg");
+const bricksAmbientOcclusionTexture = textureLoader.load(
+  "/textures/bricks/ambientOcclusion.jpg"
+);
 const bricksNormalTexture = textureLoader.load("/textures/bricks/normal.jpg");
-const bricksRoughnessTexture = textureLoader.load("/textures/bricks/roughness.jpg");
+const bricksRoughnessTexture = textureLoader.load(
+  "/textures/bricks/roughness.jpg"
+);
 
 const house = new THREE.Group();
 scene.add(house);
 
 // Walls
 const walls = new THREE.Mesh(
-    new THREE.BoxGeometry(7, 5.5, 7),
-    new THREE.MeshStandardMaterial({
-        map: bricksColorTexture,
-        aoMap: bricksAmbientOcclusionTexture,
-        normalMap: bricksNormalTexture,
-        roughnessMap: bricksRoughnessTexture,
-    })
+  new THREE.BoxGeometry(7, 5.5, 7),
+  new THREE.MeshStandardMaterial({
+    map: bricksColorTexture,
+    aoMap: bricksAmbientOcclusionTexture,
+    normalMap: bricksNormalTexture,
+    roughnessMap: bricksRoughnessTexture,
+  })
 );
 walls.castShadow = true;
-walls.geometry.setAttribute("uv2", new THREE.Float32BufferAttribute(walls.geometry.attributes.uv.array, 2));
+walls.geometry.setAttribute(
+  "uv2",
+  new THREE.Float32BufferAttribute(walls.geometry.attributes.uv.array, 2)
+);
 walls.position.y = 1.25;
 house.add(walls);
 
 // Roof
-const roof = new THREE.Mesh(new THREE.ConeGeometry(6, 1, 4), new THREE.MeshStandardMaterial({ color: "#b35f45" }));
+const roof = new THREE.Mesh(
+  new THREE.ConeGeometry(6, 1, 4),
+  new THREE.MeshStandardMaterial({ color: "#b35f45" })
+);
 roof.rotation.y = Math.PI * 0.25;
 roof.position.y = 4 + 0.5;
 house.add(roof);
 
 // Door
 const door = new THREE.Mesh(
-    new THREE.PlaneGeometry(3.5, 3.5, 100, 100),
-    new THREE.MeshStandardMaterial({
-        map: doorColorTexture,
-        transparent: true,
-        alphaMap: doorAlphaTexture,
-        aoMap: doorAmbientOcclusionTexture,
-        displacementMap: doorHeightTexture,
-        displacementScale: 0.1,
-        normalMap: doorNormalTexture,
-        metalnessMap: doorMetalnessTexture,
-        roughnessMap: doorRoughnessTexture,
-    })
+  new THREE.PlaneGeometry(3.5, 3.5, 100, 100),
+  new THREE.MeshStandardMaterial({
+    map: doorColorTexture,
+    transparent: true,
+    alphaMap: doorAlphaTexture,
+    aoMap: doorAmbientOcclusionTexture,
+    displacementMap: doorHeightTexture,
+    displacementScale: 0.1,
+    normalMap: doorNormalTexture,
+    metalnessMap: doorMetalnessTexture,
+    roughnessMap: doorRoughnessTexture,
+  })
 );
-door.geometry.setAttribute("uv2", new THREE.Float32BufferAttribute(door.geometry.attributes.uv.array, 2));
+door.geometry.setAttribute(
+  "uv2",
+  new THREE.Float32BufferAttribute(door.geometry.attributes.uv.array, 2)
+);
 door.position.y = 1.5;
 door.position.z = 3.5 + 0.01;
 house.add(door);
@@ -179,8 +209,8 @@ bush4.position.set(-1, 0.05, 2.6);
 house.add(bush1, bush2, bush3, bush4);
 
 //Physics
-const world = new CANNON.World()
-world.gravity.set(0, - 9.82, 0)
+const world = new CANNON.World();
+world.gravity.set(0, -9.82, 0);
 // LIGHTS
 light();
 
@@ -195,77 +225,266 @@ generateFloor();
 const keysPressed = {};
 const keyDisplayQueue = new KeyDisplay();
 document.addEventListener(
-    "keydown",
-    (event) => {
-        keyDisplayQueue.down(event.key);
-        if (event.shiftKey && characterControls) {
-            characterControls.switchRunToggle();
-        } else {
-            keysPressed[event.key.toLowerCase()] = true;
-        }
-    },
-    false
+  "keydown",
+  (event) => {
+    keyDisplayQueue.down(event.key);
+    if (event.shiftKey && characterControls) {
+      characterControls.switchRunToggle();
+    } else {
+      keysPressed[event.key.toLowerCase()] = true;
+    }
+  },
+  false
 );
 document.addEventListener(
-    "keyup",
-    (event) => {
-        keyDisplayQueue.up(event.key);
-        keysPressed[event.key.toLowerCase()] = false;
-    },
-    false
+  "keyup",
+  (event) => {
+    keyDisplayQueue.up(event.key);
+    keysPressed[event.key.toLowerCase()] = false;
+  },
+  false
+);
+const upNode = Array.from(document.querySelectorAll(".controls")).filter(
+  (el) => el.innerHTML === "W"
+);
+upNode[0].addEventListener(
+  "mousedown",
+  (event) => {
+    keyDisplayQueue.down("w");
+    if (event.shiftKey && characterControls) {
+      characterControls.switchRunToggle();
+    } else {
+      keysPressed["w"] = true;
+    }
+  },
+  false
+);
+upNode[0].addEventListener(
+  "mouseup",
+  (event) => {
+    keyDisplayQueue.up("w");
+    keysPressed["w"] = false;
+  },
+  false
+);
+const rightNode = Array.from(document.querySelectorAll(".controls")).filter(
+  (el) => el.innerHTML === "D"
+);
+rightNode[0].addEventListener(
+  "mousedown",
+  (event) => {
+    keyDisplayQueue.down("d");
+    if (event.shiftKey && characterControls) {
+      characterControls.switchRunToggle();
+    } else {
+      keysPressed["d"] = true;
+    }
+  },
+  false
+);
+rightNode[0].addEventListener(
+  "mouseup",
+  (event) => {
+    keyDisplayQueue.up("d");
+    keysPressed["d"] = false;
+  },
+  false
+);
+const leftNode = Array.from(document.querySelectorAll(".controls")).filter(
+  (el) => el.innerHTML === "A"
+);
+leftNode[0].addEventListener(
+  "mousedown",
+  (event) => {
+    keyDisplayQueue.down("a");
+    if (event.shiftKey && characterControls) {
+      characterControls.switchRunToggle();
+    } else {
+      keysPressed["a"] = true;
+    }
+  },
+  false
+);
+leftNode[0].addEventListener(
+  "mouseup",
+  (event) => {
+    keyDisplayQueue.up("a");
+    keysPressed["a"] = false;
+  },
+  false
+);
+const downNode = Array.from(document.querySelectorAll(".controls")).filter(
+  (el) => el.innerHTML === "S"
+);
+downNode[0].addEventListener(
+  "mousedown",
+  (event) => {
+    keyDisplayQueue.down("s");
+    if (event.shiftKey && characterControls) {
+      characterControls.switchRunToggle();
+    } else {
+      keysPressed["s"] = true;
+    }
+  },
+  false
+);
+downNode[0].addEventListener(
+  "mouseup",
+  (event) => {
+    keyDisplayQueue.up("s");
+    keysPressed["s"] = false;
+  },
+  false
+);
+const upNodeMobile = document.querySelector(".controls-w");
+upNodeMobile.addEventListener(
+  "touchstart",
+  (event) => {
+    keyDisplayQueue.down("w");
+    if (event.shiftKey && characterControls) {
+      characterControls.switchRunToggle();
+    } else {
+      keysPressed["w"] = true;
+    }
+  },
+  false
+);
+upNodeMobile.addEventListener(
+  "touchend",
+  (event) => {
+    keyDisplayQueue.up("w");
+    keysPressed["w"] = false;
+  },
+  false
+);
+const rightNodeMobile = document.querySelector(".controls-d");
+
+rightNodeMobile.addEventListener(
+  "touchstart",
+  (event) => {
+    keyDisplayQueue.down("d");
+    if (event.shiftKey && characterControls) {
+      characterControls.switchRunToggle();
+    } else {
+      keysPressed["d"] = true;
+    }
+  },
+  false
+);
+rightNodeMobile.addEventListener(
+  "touchend",
+  (event) => {
+    keyDisplayQueue.up("d");
+    keysPressed["d"] = false;
+  },
+  false
+);
+const leftNodeMobile = document.querySelector(".controls-a");
+
+leftNodeMobile.addEventListener(
+  "touchstart",
+  (event) => {
+    keyDisplayQueue.down("a");
+    if (event.shiftKey && characterControls) {
+      characterControls.switchRunToggle();
+    } else {
+      keysPressed["a"] = true;
+    }
+  },
+  false
+);
+leftNodeMobile.addEventListener(
+  "touchend",
+  (event) => {
+    keyDisplayQueue.up("a");
+    keysPressed["a"] = false;
+  },
+  false
+);
+const downNodeMobile = document.querySelector(".controls-s");
+
+downNodeMobile.addEventListener(
+  "touchstart",
+  (event) => {
+    keyDisplayQueue.down("s");
+    if (event.shiftKey && characterControls) {
+      characterControls.switchRunToggle();
+    } else {
+      keysPressed["s"] = true;
+    }
+  },
+  false
+);
+downNodeMobile.addEventListener(
+  "touchend",
+  (event) => {
+    keyDisplayQueue.up("s");
+    keysPressed["s"] = false;
+  },
+  false
 );
 
 const clock = new THREE.Clock();
 
 // RESIZE HANDLER
 function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    keyDisplayQueue.updatePosition();
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  keyDisplayQueue.updatePosition();
 }
 window.addEventListener("resize", onWindowResize);
 
 function generateFloor() {
-    // TEXTURES
-    const placeholder = textureLoader.load("./textures/floor/stone/PavingStones070_Color.jpg");
+  // TEXTURES
+  const placeholder = textureLoader.load(
+    "./textures/floor/stone/PavingStones070_Color.jpg"
+  );
 
-    const floorColorTexture = textureLoader.load("./textures/floor/stone/PavingStones070_Color.jpg");
-    const floorAmbientOcclusionTexture = textureLoader.load(
-        "./textures/floor/stone/PavingStones070_AmbientOcclusion.jpg"
-    );
-    const floorNormalTexture = textureLoader.load("./textures/floor/stone/PavingStones070_NormalGL.jpg");
-    const floorRoughnessTexture = textureLoader.load("./textures/floor/stone/PavingStones070_Roughness.jpg");
-    const floorHeightTexture = textureLoader.load("./textures/floor/stone/PavingStones070_Displacement.jpg");
+  const floorColorTexture = textureLoader.load(
+    "./textures/floor/stone/PavingStones070_Color.jpg"
+  );
+  const floorAmbientOcclusionTexture = textureLoader.load(
+    "./textures/floor/stone/PavingStones070_AmbientOcclusion.jpg"
+  );
+  const floorNormalTexture = textureLoader.load(
+    "./textures/floor/stone/PavingStones070_NormalGL.jpg"
+  );
+  const floorRoughnessTexture = textureLoader.load(
+    "./textures/floor/stone/PavingStones070_Roughness.jpg"
+  );
+  const floorHeightTexture = textureLoader.load(
+    "./textures/floor/stone/PavingStones070_Displacement.jpg"
+  );
 
-    const WIDTH = 4;
-    const LENGTH = 4;
-    const NUM_X = 15;
-    const NUM_Z = 15;
+  const WIDTH = 4;
+  const LENGTH = 4;
+  const NUM_X = 15;
+  const NUM_Z = 15;
 
-    const geometry = new THREE.PlaneGeometry(WIDTH, LENGTH, 512, 512);
-    const material = new THREE.MeshStandardMaterial({
-        map: floorColorTexture,
-        normalMap: floorNormalTexture,
-        displacementMap: floorHeightTexture,
-        displacementScale: 0.1,
-        roughnessMap: floorRoughnessTexture,
-        aoMap: floorAmbientOcclusionTexture,
-    });
-    // const material = new THREE.MeshPhongMaterial({ map: placeholder})
+  const geometry = new THREE.PlaneGeometry(WIDTH, LENGTH, 512, 512);
+  const material = new THREE.MeshStandardMaterial({
+    map: floorColorTexture,
+    normalMap: floorNormalTexture,
+    displacementMap: floorHeightTexture,
+    displacementScale: 0.1,
+    roughnessMap: floorRoughnessTexture,
+    aoMap: floorAmbientOcclusionTexture,
+  });
+  // const material = new THREE.MeshPhongMaterial({ map: placeholder})
 
-    for (let i = 0; i < NUM_X; i++) {
-        for (let j = 0; j < NUM_Z; j++) {
-            const floor = new THREE.Mesh(geometry, material);
-            floor.receiveShadow = true;
-            floor.rotation.x = -Math.PI / 2;
+  for (let i = 0; i < NUM_X; i++) {
+    for (let j = 0; j < NUM_Z; j++) {
+      const floor = new THREE.Mesh(geometry, material);
+      floor.receiveShadow = true;
+      floor.rotation.x = -Math.PI / 2;
 
-            floor.position.x = i * WIDTH - (NUM_X / 2) * WIDTH;
-            floor.position.z = j * LENGTH - (NUM_Z / 2) * LENGTH;
+      floor.position.x = i * WIDTH - (NUM_X / 2) * WIDTH;
+      floor.position.z = j * LENGTH - (NUM_Z / 2) * LENGTH;
 
-            scene.add(floor);
-        }
+      scene.add(floor);
     }
+  }
 }
 /**
  * Ghosts
@@ -291,64 +510,65 @@ ghost3.shadow.mapSize.height = 256;
 ghost3.shadow.camera.far = 7;
 scene.add(ghost3);
 function light() {
-    /**
-     * Lights
-     */
-    // Ambient light
-    const ambientLight = new THREE.AmbientLight("#b9d5ff", 0.3);
-    gui.add(ambientLight, "intensity").min(0).max(1).step(0.001);
-    scene.add(ambientLight);
+  /**
+   * Lights
+   */
+  // Ambient light
+  const ambientLight = new THREE.AmbientLight("#b9d5ff", 0.3);
+  gui.add(ambientLight, "intensity").min(0).max(1).step(0.001);
+  scene.add(ambientLight);
 
-    // Directional light
-    const moonLight = new THREE.DirectionalLight("#b9d5ff", 0.12);
-    moonLight.castShadow = true;
-    moonLight.shadow.mapSize.width = 256;
-    moonLight.shadow.mapSize.height = 256;
-    moonLight.shadow.camera.far = 15;
-    moonLight.position.set(4, 5, -2);
-    gui.add(moonLight, "intensity").min(0).max(1).step(0.001);
-    gui.add(moonLight.position, "x").min(-5).max(5).step(0.001);
-    gui.add(moonLight.position, "y").min(-5).max(5).step(0.001);
-    gui.add(moonLight.position, "z").min(-5).max(5).step(0.001);
-    scene.add(moonLight);
+  // Directional light
+  const moonLight = new THREE.DirectionalLight("#b9d5ff", 0.12);
+  moonLight.castShadow = true;
+  moonLight.shadow.mapSize.width = 256;
+  moonLight.shadow.mapSize.height = 256;
+  moonLight.shadow.camera.far = 15;
+  moonLight.position.set(4, 5, -2);
+  gui.add(moonLight, "intensity").min(0).max(1).step(0.001);
+  gui.add(moonLight.position, "x").min(-5).max(5).step(0.001);
+  gui.add(moonLight.position, "y").min(-5).max(5).step(0.001);
+  gui.add(moonLight.position, "z").min(-5).max(5).step(0.001);
+  scene.add(moonLight);
 
-    // Door light
-    const doorLight = new THREE.PointLight("#ff7d46", 1, 7);
-    doorLight.castShadow = true;
-    doorLight.shadow.mapSize.width = 256;
-    doorLight.shadow.mapSize.height = 256;
-    doorLight.shadow.camera.far = 7;
+  // Door light
+  const doorLight = new THREE.PointLight("#ff7d46", 1, 7);
+  doorLight.castShadow = true;
+  doorLight.shadow.mapSize.width = 256;
+  doorLight.shadow.mapSize.height = 256;
+  doorLight.shadow.camera.far = 7;
 
-    doorLight.position.set(0, 4, 4.7);
-    house.add(doorLight);
+  doorLight.position.set(0, 4, 4.7);
+  house.add(doorLight);
 
-    // scene.add( new THREE.CameraHelper(dirLight.shadow.camera))
+  // scene.add( new THREE.CameraHelper(dirLight.shadow.camera))
 }
 // ANIMATE
 function animate() {
-    let mixerUpdateDelta = clock.getDelta();
-    const elapsedTime = clock.getElapsedTime()
-    if (characterControls) {
-        characterControls.update(mixerUpdateDelta, keysPressed);
-    }
-    orbitControls.update();
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
-    // Ghosts
-    const ghost1Angle = elapsedTime * 0.5;
-    ghost1.position.x = Math.cos(ghost1Angle) * 6;
-    ghost1.position.z = Math.sin(ghost1Angle) * 6;
-    ghost1.position.y = Math.sin(elapsedTime * 5);
+  let mixerUpdateDelta = clock.getDelta();
+  const elapsedTime = clock.getElapsedTime();
+  if (characterControls) {
+    characterControls.update(mixerUpdateDelta, keysPressed);
+  }
+  orbitControls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+  // Ghosts
+  const ghost1Angle = elapsedTime * 0.5;
+  ghost1.position.x = Math.cos(ghost1Angle) * 6;
+  ghost1.position.z = Math.sin(ghost1Angle) * 6;
+  ghost1.position.y = Math.sin(elapsedTime * 5);
 
-    const ghost2Angle = -elapsedTime * 0.32;
-    ghost2.position.x = Math.cos(ghost2Angle) * 6
-    ghost2.position.z = Math.sin(ghost2Angle) * 6;
-    ghost2.position.y = Math.sin(elapsedTime * 4) + Math.sin(elapsedTime * 2.5);
+  const ghost2Angle = -elapsedTime * 0.32;
+  ghost2.position.x = Math.cos(ghost2Angle) * 6;
+  ghost2.position.z = Math.sin(ghost2Angle) * 6;
+  ghost2.position.y = Math.sin(elapsedTime * 4) + Math.sin(elapsedTime * 2.5);
 
-    const ghost3Angle = -elapsedTime * 0.18;
-    ghost3.position.x = Math.cos(ghost3Angle) * (7 + Math.sin(elapsedTime * 0.32));
-    ghost3.position.z = Math.sin(ghost3Angle) * (7 + Math.sin(elapsedTime * 0.5));
-    ghost3.position.y = Math.sin(elapsedTime * 4) + Math.sin(elapsedTime * 2.5);
+  const ghost3Angle = -elapsedTime * 0.18;
+  ghost3.position.x =
+    Math.cos(ghost3Angle) * (7 + Math.sin(elapsedTime * 0.32));
+  ghost3.position.z = Math.sin(ghost3Angle) * (7 + Math.sin(elapsedTime * 0.5));
+  ghost3.position.y = Math.sin(elapsedTime * 4) + Math.sin(elapsedTime * 2.5);
 }
 document.body.appendChild(renderer.domElement);
 animate();
